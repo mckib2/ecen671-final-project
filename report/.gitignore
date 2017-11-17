@@ -1,0 +1,10 @@
+makefile~
+*.bbl
+*.aux
+*.blg
+*.dvi
+*.lof
+*.log
+*.pdf
+*.tex~
+*.toc
