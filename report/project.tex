@@ -18,7 +18,27 @@ An abstract
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
 
-An introduction.
+Compressed sensing is a technique for reconstructing a signal that has been
+highly undersampled. It is impossible to recover an undersampled signal in 
+general: there is no way to know what the missing information was. However, when
+the original signal meets certain constraints, it becomes possible to recover it
+from its undersampled representation with a high (or even perfect) degree of
+accuracy. For example, if the highest-frequency component $f$ of a signal is
+known, the signal can be perfectly recovered if it is sampled uniformly with a 
+sampling rate of $2f$ (the Nyquist sampling theorem). Compressed sensing is a
+method for recovering signals that have been undersampled to an even greater
+degree. In order for a signal to be recoverable through compressed sensing, it
+must meet two constraints. First, it must have a sparse representation in some
+transform domain. Second, the sampling must be done incoherently so that the
+resulting aliasing appears like a relatively low level of noise in the transform
+domain. Luckily, many signals of interest can be shown to have sparse
+representations is some domain, such as the Wavelet Transform or the Discrete
+Cosine Transform. If those signals are then sampled in the right way, they can
+be represented by far fewer data points but recovered almost exactly.
+
+In this work, we explore compressed sensing for recovering highly undersampled
+images. We outline the method and mathematics involved, as well as some recent
+developments in more effective sensing matrices.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{BODY}
