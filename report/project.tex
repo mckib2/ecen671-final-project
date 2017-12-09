@@ -1,6 +1,10 @@
 \documentclass[journal]{IEEEtran}
 \usepackage{cite}
 \usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\graphicspath{ {figures/} }
 
 \title{Optimizing Compressed Sensing Sensing Matrices}
 \author{Nicholas McKibben and Connor Anderson}
@@ -18,7 +22,7 @@ An abstract
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{INTRODUCTION}
 
-Compressed sensing is a technique for reconstructing a signal that has been
+Compressed Sensing (CS) is a technique for reconstructing a signal that has been
 highly undersampled. It is impossible to recover an undersampled signal in 
 general: there is no way to know what the missing information was. However, when
 the original signal meets certain constraints, it becomes possible to recover it
@@ -41,9 +45,23 @@ images. We outline the method and mathematics involved, as well as some recent
 developments in more effective sensing matrices.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{BODY}
+\section{THEORY OF COMPRESSED SENSING}
 
-Some body content. Here's a citation \cite{example}.
+The notion of sparse representation and reconstruction is actually a well-studied problem within statistics, first described by Santosa and Symes in 1986 \cite{santosa}.  But the ramifications of the robustness of the reconstructions provided by this theory have only started to be realized in the past decade, with an emphasis on sparse sensing instead of retroactive application to already complete datasets, hence the name ``compressed sensing'' \cite{donoho}.
+
+This reemergence of CS grew out of the pioneering work of Cand\`es, Romberg, Tao, and Donoho, who demonstrated that \emph{n}-dimensional signals with sparse representations can be exactly reconstructed from a set of linear, non-adaptive measurements in a wide variety of cases \cite{csbook,baraniuk,candes,donoho}.
+
+CS differs from classical sampling theory in a few important ways.  First, classical sampling theory typically considers infinite dimensional, continuous-time signals.  CS restricts itself to finite, \emph{n}-dimensional signals.  Secondly, CS formulations usually do not sample the signal at specific points in time as is done classically.  Rather, measurements are acquired in the form of inner products between the signal and more general test functions (usually including some random component) \cite{csbook}.  Lastly, Nyquist-Shannon relies on sinc interpolation, whereas CS signal recovery typically uses highly non-linear methods \cite{oppenheimdigital,csbook}.
+
+%Intuitively, we can understand CS as inducing a pseudo-noisefloor by randomly undersampling the signal of interest.  While uniform undersampling leads to coherent artifacting, random undersampling leads to incoherent aliasing in the measurement domain.  In the sparse domain, the incoherent aliasing leads to a noise floor with identifiably high sparse coefficients.  An iterative method based on thresholding, recovering the strong components, calculating the interference caused by them, and subtracting the calculated interference from the noisefloor while retroactively enforcing data consistency can be used to understand the reconstruction process \cite{lustig}.
+
+Formally, CS can be understood as a method of finding an exact (or close) solution to the highly underdetermined system $Ax = b$, with $A$ being an $m \times n$ matrix such that $m \ll n$.  To find a unique solution, the system is regularized by imposing sparsity using the $\ell_0$ pseudo-norm in the constrained, highly non-convex optimization problem $$ \min_{\forall x \in \mathbb{R}^n}  ||x||_0 \mbox{ subject to } Ax = b $$ as in \cite{convexoptimization,sparseapprox}.  The $\ell_0$ quasi-norm is known to be NP-hard and is shown to be approximately equivalent in most cases to the more tractable convex optimization problem using the $\ell_1$ norm \cite{convexoptimization}.  Many CS methods exhibit denoising effects and are described by the modified constrained optimization problem $$ \min_{\forall x \in \mathbb{R}^n} ||x||_1 \mbox{ subject to } ||Ax - b||_2 \leq \sigma, $$ taking into account the standard deviation, $\sigma$, of the noise \cite{basispursuit}.
+
+\section{SENSING MATRICES}
+
+Successful CS reconstruction is achieved if certain properties of the sampling operator can be guaranteed (e.g., the Restricted Isometry Property, mutual coherence minimization, or the nullspace property \cite{tcs}).  These properties ensure sufficient conditions on the equivalent sensing matrix\footnote{The equivalent sensing matrix is the product of the sensing matrix and the sparsifying basis} for accurate signal recovery. Random matrices (i.e., Gaussian or Bernoulli) are known to satisfy these properties for any given sparsifying basis and are used widely sensing matrices in many CS applications.
+
+\section{RESULTS}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{CONCLUSION}

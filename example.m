@@ -16,7 +16,7 @@ w2 = 3266*pi;
 f = sin(w1*t) + sin(w2*t);
 
 % m is the percentage of the original samples sampled
-m = .1*N;
+m = .15*N;
 idx = randsample(N,m);
 
 fprintf('Sampling ratio: %f%%\n',m/N*100);
