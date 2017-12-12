@@ -7,7 +7,7 @@ n = 400;
 t = 0.2;
 p = 30;
 gamma = 0.5;
-iters = 500;
+iters = 300;
 
 %% test shrink
 in = linspace(-1,1,1000);
@@ -31,17 +31,17 @@ G = (D.')*(P.')*P*D;
 histogram(abs(G - diag(diag(G))));
 
 %% run
-[ P_opt, histo ] = min_P(t,D,p,gamma,iters);
+[ P_opt, Pk ] = min_P(t,D,p,gamma,iters);
 
 %% show optimial Projection Matrix
 figure(3);
-Go = (D.')*(P_opt.')*P_opt*D;
-histogram(abs(Go - diag(diag(Go))));
+G_opt = (D.')*(P_opt.')*P_opt*D;
+histogram(abs(G_opt - diag(diag(G_opt))));
 
 %% get mutual coherence values
-mu = zeros(length(histo),1);
-for kk = 1:length(histo)
-    mu(kk) = mutualcoherence(histo{kk}*D);
+mu = zeros(length(Pk),1);
+for kk = 1:length(Pk)
+    mu(kk) = mutualcoherence(Pk{kk}*D);
 end
 
 figure(4);

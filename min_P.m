@@ -42,14 +42,12 @@ function [ P, histo ] = min_P(t,D,p,gamma,iters)
         %% (6) Squared-Root
         % Build the squared-root of G_hat_q, S_q^T S_q = G_hat_q, where
         % S_q is of size pxk
-        
-        % This is the current problem - can't figure out how to get a pxn
-        % matrix square root.
-        S = D_hat;
+        S = rasqrtm(G_hat);
         
         %% (7) Update P
         % Find P_{q+1} that minimizes the error ||S_q - PD||^2_F
-        [P] = fminsearch(@(Pq) norm(S - Pq*D,'fro')^2,P,options);
+        %[P] = fminsearch(@(Pq) norm(S - Pq*D,'fro')^2,P,options);
+        P = min_fro2(S,D);
         histo{q} = P;
     end
 end

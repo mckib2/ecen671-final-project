@@ -1,4 +1,6 @@
 function [ u ] = mutualcoherence(D)
-    nD = normc(D);
-    u = max(max(triu(abs((nD')*nD),1)));
+    D = D/(diag(sqrt(diag(D'*D))));
+    u = abs(D'*D);
+    u = u - diag(diag(u));
+    u = max(max(u));
 end
