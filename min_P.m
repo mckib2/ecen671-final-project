@@ -8,10 +8,7 @@ function [ P, histo ] = min_P(t,D,p,gamma,iters)
     k = size(D,2);
     n = size(D,1);
     P = gen_D(p,n);
-    
-    options = optimset('PlotFcns',@optimplotfval,'MaxIter',3);
-%     options = optimset('MaxIter',3);
-    
+
     %% Loop
     histo = cell(iters,1);
     for q = 1:iters
