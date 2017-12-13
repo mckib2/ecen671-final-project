@@ -9,6 +9,7 @@ function [ G_hat ] = shrink(G,t,gamma)
             elseif (gamma*t > abs(G(ii,jj)))
                 G_hat(ii,jj) = G(ii,jj);
             else
+                fprintf('I should never get here...\n');
                 G_hat(ii,jj) = G(ii,jj);
             end
         end

@@ -2,12 +2,12 @@
 % http://ieeexplore.ieee.org/document/4359525/
 % Objective: Minize mu_t{PD} with respect to P.
 
-function [ P, histo ] = min_P(t,D,p,gamma,iters)
+function [ P, histo ] = min_P(D,P,t,p,gamma,iters)
     %% Initialization
     % Set P0 \in R^{pxn} to be an arbitrary random matrix.
-    k = size(D,2);
+    %k = size(D,2);
     n = size(D,1);
-    P = gen_D(p,n);
+    %P = gen_D(p,n);
 
     %% Loop
     histo = cell(iters,1);
@@ -20,7 +20,7 @@ function [ P, histo ] = min_P(t,D,p,gamma,iters)
         
         %% (2) Compute Gram Matrix
         % G_q = D_hat_q^T D_hat_q
-        G = (D_hat.')*D_hat;
+        G = D_hat'*D_hat;
         
         %% (3) Set Threshold
         % If mode of operation is fixed, use t as threshold.  Otherwise,

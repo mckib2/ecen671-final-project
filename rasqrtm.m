@@ -8,9 +8,8 @@ function [ S ] = rasqrtm(G_hat)
     % So there's a weird thing where sometimes we get a negative eigenvalue
     % after rank reduction, so we'll throw an error when that happens
     p = rank(G_hat);
-    lambdas = eigs(G_hat,p);
-    if any(lambdas < 0)
-        fprintf('We got a semi-definite negative matrix people!\n');
+    if any(eigs(G_hat,p) < 0)
+        fprintf('We got a negative semi-definite matrix people!\n');
     end
 
     % Now we need to find the square root matrix
