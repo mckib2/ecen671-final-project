@@ -23,10 +23,18 @@ fprintf('Sampling ratio: %f%%\n',m/N*100);
 
 % Plot the fully sampled signal showing m random samples
 figure(1);
-h = plot(t,f,'-s');
-h.MarkerSize = 2;
-h.MarkerIndices = idx;
-zoom('xon'); zoom(10);
+% h = plot(t,f,'-s');
+% h.MarkerSize = 2;
+% idx = 1:2:N;
+% h.MarkerIndices = idx;
+idx = 1:1:N;
+samps = zeros(size(f));
+samps(idx) = f(idx);
+samps(samps == 0) = NaN;
+plot(t,samps,'.');
+
+% plot(t,f(idx),'-');
+zoom('xon'); zoom(13);
 
 %% IDCT of f
 % Plot the actual sparse coefficients
