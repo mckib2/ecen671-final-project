@@ -4,10 +4,10 @@ close all;
 k = 200;
 n = 400;
 
-t = 0.2;
+t = 0.1;
 p = 30;
-gamma = 0.55;
-iters = 500;
+gamma = 0.95;
+iters = 50;
 
 %% test shrink
 in = linspace(-1,1,1000);
@@ -47,3 +47,5 @@ end
 figure(4);
 plot(1:length(Pk),mu,'.-');
 title(sprintf('Value of %s, t = %.1f, %s = %.1f','\mu_t\{P_kD\}',t,'\gamma',gamma));
+xlabel('Iteration, k');
+ylabel('Value of \mu_t');

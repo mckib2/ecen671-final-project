@@ -11,8 +11,9 @@ function [ P, histo ] = min_P(D,P,t,p,gamma,iters)
 
     %% Loop
     histo = cell(iters,1);
-    for q = 1:iters
-        fprintf('q: %d\n',q);
+    q = 1;
+    while (q <= iters)
+        %fprintf('q: %d\n',q);
         %% (1) Normalize
         % Normalize the columns in the matrix P_qD and obtain the effective
         % dictionary D_hat_q
@@ -39,12 +40,21 @@ function [ P, histo ] = min_P(D,P,t,p,gamma,iters)
         %% (6) Squared-Root
         % Build the squared-root of G_hat_q, S_q^T S_q = G_hat_q, where
         % S_q is of size pxk
-        S = rasqrtm(G_hat);
+        success = 1;
+        [ S, success ] = rasqrtm(G_hat);
+        if success == 0
+            fprintf('Finding another P and starting over again...\n');
+            P = gen_D(p,n);
+            q = 1;
+            continue;
+        end
         
         %% (7) Update P
         % Find P_{q+1} that minimizes the error ||S_q - PD||^2_F
         %[P] = fminsearch(@(Pq) norm(S - Pq*D,'fro')^2,P,options);
         P = min_fro2(S,D);
         histo{q} = P;
+        
+        q = q + 1;
     end
 end

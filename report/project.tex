@@ -16,36 +16,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
-An abstract
+Compressed Sensing (CS) is a technique for reconstructing a signal that has been sampled well below the Nyquist-Shannon criterion.  In general, it is impossible to recover an undersampled signal: there is no way to know what the missing information was. However, when the original signal meets certain constraints, it becomes possible to recover it from its undersampled representation with a high (or even perfect) degree of accuracy. Compressed sensing is a method for recovering signals that have been highly undersampled that meet two constraints. First, it must have a sparse representation in some transform domain. Second, the sampling must be accomplished in such a way so that the resulting aliasing is incoherent. Luckily, many signals of interest can be shown to have sparse representations is some domain, such as the Wavelet Transform or the Discrete Cosine Transform. If those signals are then sampled in the right way, they can be represented by far fewer data points but recovered almost exactly.  This project demonstrates an algorithm that optimizes the sensing matrix for basis pursuit CS reconstruction.
 
 \end{abstract}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{INTRODUCTION}
-
-Compressed Sensing (CS) is a technique for reconstructing a signal that has been
-highly undersampled. It is impossible to recover an undersampled signal in 
-general: there is no way to know what the missing information was. However, when
-the original signal meets certain constraints, it becomes possible to recover it
-from its undersampled representation with a high (or even perfect) degree of
-accuracy. For example, if the highest-frequency component $f$ of a signal is
-known, the signal can be perfectly recovered if it is sampled uniformly with a 
-sampling rate of $2f$ (the Nyquist sampling theorem). Compressed sensing is a
-method for recovering signals that have been undersampled to an even greater
-degree. In order for a signal to be recoverable through compressed sensing, it
-must meet two constraints. First, it must have a sparse representation in some
-transform domain. Second, the sampling must be done incoherently so that the
-resulting aliasing appears like a relatively low level of noise in the transform
-domain. Luckily, many signals of interest can be shown to have sparse
-representations is some domain, such as the Wavelet Transform or the Discrete
-Cosine Transform. If those signals are then sampled in the right way, they can
-be represented by far fewer data points but recovered almost exactly.
-
-In this work, we explore compressed sensing for recovering highly undersampled
-images. We outline the method and mathematics involved, as well as some recent
-developments in more effective sensing matrices.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{THEORY OF COMPRESSED SENSING}
+\section{INTRODUCTION}
 
 The notion of sparse representation and reconstruction is actually a well-studied problem within statistics, first described by Santosa and Symes in 1986 \cite{santosa}.  But the ramifications of the robustness of the reconstructions provided by this theory have only started to be realized in the past decade, with an emphasis on sparse sensing instead of retroactive application to already complete datasets, hence the name ``compressed sensing'' \cite{donoho}.
 
@@ -53,21 +30,39 @@ This reemergence of CS grew out of the pioneering work of Cand\`es, Romberg, Tao
 
 CS differs from classical sampling theory in a few important ways.  First, classical sampling theory typically considers infinite dimensional, continuous-time signals.  CS restricts itself to finite, \emph{n}-dimensional signals.  Secondly, CS formulations usually do not sample the signal at specific points in time as is done classically.  Rather, measurements are acquired in the form of inner products between the signal and more general test functions (usually including some random component) \cite{csbook}.  Lastly, Nyquist-Shannon relies on sinc interpolation, whereas CS signal recovery typically uses highly non-linear methods \cite{oppenheimdigital,csbook}.
 
-%Intuitively, we can understand CS as inducing a pseudo-noisefloor by randomly undersampling the signal of interest.  While uniform undersampling leads to coherent artifacting, random undersampling leads to incoherent aliasing in the measurement domain.  In the sparse domain, the incoherent aliasing leads to a noise floor with identifiably high sparse coefficients.  An iterative method based on thresholding, recovering the strong components, calculating the interference caused by them, and subtracting the calculated interference from the noisefloor while retroactively enforcing data consistency can be used to understand the reconstruction process \cite{lustig}.
+Successful CS reconstruction is achieved if certain properties of the sampling operator, or sensing matrix, can be guaranteed (e.g., the Restricted Isometry Property, mutual coherence minimization, or the nullspace property \cite{tcs}).  These properties ensure sufficient conditions on the equivalent sensing matrix\footnote{The equivalent sensing matrix is the product of the sensing matrix and the sparsifying basis} for accurate signal recovery. Random matrices (i.e., Gaussian or Bernoulli) are known to satisfy these properties for any given sparsifying basis and are used widely sensing matrices in many CS applications.
 
-Formally, CS can be understood as a method of finding an exact (or close) solution to the highly underdetermined system $Ax = b$, with $A$ being an $m \times n$ matrix such that $m \ll n$.  To find a unique solution, the system is regularized by imposing sparsity using the $\ell_0$ pseudo-norm in the constrained, highly non-convex optimization problem $$ \min_{\forall x \in \mathbb{R}^n}  ||x||_0 \mbox{ subject to } Ax = b $$ as in \cite{convexoptimization,sparseapprox}.  The $\ell_0$ quasi-norm is known to be NP-hard and is shown to be approximately equivalent in most cases to the more tractable convex optimization problem using the $\ell_1$ norm \cite{convexoptimization}.  Many CS methods exhibit denoising effects and are described by the modified constrained optimization problem $$ \min_{\forall x \in \mathbb{R}^n} ||x||_1 \mbox{ subject to } ||Ax - b||_2 \leq \sigma, $$ taking into account the standard deviation, $\sigma$, of the noise \cite{basispursuit}.
+In 2007, Michael Elad demonstrated that minimizing the mutual coherence of a projection matrix $P$ (the sampling operator) improves CS reconstruction \cite{elad}.  In this paper we will present the main theory behind the optimization, the results of our implementation, and a discussion of the merits and pitfalls of Elad's algorithm.
 
 \section{MATH}
 
-Here we describe the math behind CS. We have a set of signals $\{x_j \in \mathbb{R}^n\}$ that we are interested in measuring. We assume that $x_j$ has a sparse representation in some transform domain, such as the Discrete Cosine Transform (DCT). If we have a dictionary of vectors $D \in \mathbb{R}^{n\times k}$ that spans the transform domain, then we can represent $x_j$ as a linear combination of $D$: $x_j=D\alpha_j$, where $||\alpha_j||_0 \ll n$. This simply says that we can represent $x_j$ as a linear combination of a small number of the columns of $D$. If this is the case, then there is a lot of redundant information in our signal $x_j$, and it can be accurately (or perfectly) represented in a much-lower dimensional vector space $\mathbb{R}^p$ as $$y_j=Px_j=PD\alpha_j$$ where $P \in \mathbb{R}^{p\times n}$ with $p \ll n$ is a projection matrix from $\mathbb{R}^n$ to the lower-dimensional space $\mathbb{R}^p$. We can then recover $x_j$ from $y_j$ by finding the sparsest $\alpha$ that satisfies $y_j=PD\alpha_j$.
+Here we describe the math behind our CS implementation.  For a set of signals $\{x_j \in \mathbb{R}^n\}$ that we are interested in measuring, we assume that each $x_j$ has a sparse representation in some transform domain, such as the Discrete Cosine Transform (DCT).  If we have a dictionary of vectors $D \in \mathbb{R}^{n\times k}$ whose columns span the transform domain, then we represent $x_j$ as a linear combination: $x_j = D\alpha_j$, where $||\alpha_j||_0 \ll n$, with the $\ell_0$-norm describing $\alpha$ as a sparse vector.  If this is the case, then our signal $x_j$ can be accurately (or perfectly) represented in a much-lower dimensional vector space $\mathbb{R}^p$ as $$y_j = Px_j=PD\alpha_j$$ where $P \in \mathbb{R}^{p\times n}$ with $p \ll n$ is the projection matrix from $\mathbb{R}^n$ to the lower-dimensional space $\mathbb{R}^p$.  We can then recover each $x_j$ from $y_j$ by finding the sparsest $\alpha$ that satisfies $y_j = PD\alpha_j$.
 
-What this tells us is that it should be possible recover $x_j$ from very few samples, provided we sample in an appropriate way. It has been shown that sampling randomly generally works well because it increases the incoherence of something or other... \cite{somehinggoeshere}.
+We now have a projection matrix to solve the CS problem: $$ \min_\alpha ||\alpha||_0 \mbox{ subject to } y = Px = PD\alpha.$$  The $\ell_0$ quasi-norm is known to be NP-hard and is shown to be approximately equivalent in most cases to the more tractable convex optimization problem using the $\ell_1$ norm \cite{convexoptimization}, so we solve the so-called Basis Pursuit (BP) linear program: $$ \min_\alpha ||\alpha||_1 \mbox{ subject to } y = PD\alpha .$$
+
+For a given dictionary $D$, its mutual coherence, $\mu$, is the largest absolute inner product between its columns and represents the worst similarity between dictionary columns.  This similarity is problematic for BP solvers, and we would like to minimize it to improve reconstructions.  Mathematically we show mutual coherence for  as: $$ \mu\{D\} = \max_{i \leq i,j \leq k, i \neq j} \frac{| d_i^Td_j |}{|| d_i || \cdot || d_j ||}. $$
+
+Elad points out that we can find the same quantity by considering $D$'s gramian, $G = \hat{D}^T \hat{D}$, where $\hat{D}$ is $D$ with normalized columns.  The largest off-diagonal entry of $G$ is $\mu\{D\}$ as it is defined above.  Now, to optimize ou
 
 \section{SENSING MATRICES}
 
-Successful CS reconstruction is achieved if certain properties of the sampling operator can be guaranteed (e.g., the Restricted Isometry Property, mutual coherence minimization, or the nullspace property \cite{tcs}).  These properties ensure sufficient conditions on the equivalent sensing matrix\footnote{The equivalent sensing matrix is the product of the sensing matrix and the sparsifying basis} for accurate signal recovery. Random matrices (i.e., Gaussian or Bernoulli) are known to satisfy these properties for any given sparsifying basis and are used widely sensing matrices in many CS applications.
+
 
 \section{RESULTS}
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.45\textwidth]{rel_errors.eps}
+  \caption{CS errors as a function of the number of measurements $p$ with randomly generated $P$ and optimized projections $P_{opt}$.}
+  \label{fig:intuitive}
+\end{figure}
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.45\textwidth]{mu_t.eps}
+  \caption{Value of $\mu_t\{P_kD\}$ as a function of the iteration for $t = 0.1$ and $\gamma = 0.9$.}
+  \label{fig:intuitive}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{CONCLUSION}
