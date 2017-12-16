@@ -42,32 +42,45 @@ We now have a projection matrix to solve the CS problem: $$ \min_\alpha ||\alpha
 
 For a given dictionary $D$, its mutual coherence, $\mu$, is the largest absolute inner product between its columns and represents the worst similarity between dictionary columns.  This similarity is problematic for BP solvers, and we would like to minimize it to improve reconstructions.  Mathematically we show mutual coherence for  as: $$ \mu\{D\} = \max_{i \leq i,j \leq k, i \neq j} \frac{| d_i^Td_j |}{|| d_i || \cdot || d_j ||}. $$
 
-Elad points out that we can find the same quantity by considering $D$'s gramian, $G = \hat{D}^T \hat{D}$, where $\hat{D}$ is $D$ with normalized columns.  The largest off-diagonal entry of $G$ is $\mu\{D\}$ as it is defined above.  Now, to optimize ou
+Elad points out that we can find the same quantity by considering $D$'s gramian, $G = \hat{D}^T \hat{D}$, where $\hat{D}$ is $D$ with normalized columns.  The largest off-diagonal entry of $G$ is $\mu\{D\}$ as it is defined above.  Now, the effective dictionary is $PD$, and we must optimize $\mu\{PD\}$ with respect to $P$.  It turns out that when we consider the average performance of a wider class of signals, the mutual coherence provides a poor optimization and such a method is likely to be far more complex.  With this in mind, Elad suggests that the average measure of coherence is more likely to describe the true behavior using the modified $t$-averaged mutual coherence: $$ \mu_t\{PD\} = \frac{ \sum_{1 \leq i,j \leq k, i \neq j} (| g_{ij} | \geq t) \cdot | g_{ij} | }{ \sum_{1 \leq i,j \leq k, i \neq k} (\ | g_{ij} | \geq t)} $$ where $g_{ij}$ are entries of the $PD$'s Gram matrix with normalized columns.
 
-\section{SENSING MATRICES}
-
-
+From this $t$-averaged metric, we can see that our main objective is the reduction of the inner products that are above some known threshold $t$.  We achieve this by shrinking the entries of the Gram matrix by a factor $\gamma$ while preserving the entries' ordering.  The ``shrunken'' Gram matrix is then decomposed into a squared-root matrix $G = S^TS$ which is used to solve for the new projection matrix $P$ by finding the $P$ that minimizes $ || S - PD ||_F^2 $.
 
 \section{RESULTS}
+
+We were able to successfully implement the algorithm as presented in the paper and observe the similar results to those presented.  As our implementation did not use some of the BP optimizations that the paper used, it ran an order of magnitude more slowly and we reduced matrix sizes and signal averages in order to run the experiments in a reasonable time.
+
+To show the behavior of our implementation, we constructed a random dictionary $D \in \mathbb{R}^{200 \times 400} $ with each entry drawn from an i.i.d. zero mean, unit variance Gaussian distribution with initial projection matrix $P$ formed the same way in $\mathbb{R}^{30 \times 200}$.  After $50$ iterations and with appropriate choice of $t$ and $\gamma$, our algorithm produced a converging plot of $\mu_t\{PD\}$ as shown in Figure \ref{fig:mu_t}.  With more signal averages $x_j$, we anticipate that this curve would smooth even more.
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.45\textwidth]{mu_t.eps}
+  \caption{Value of $\mu_t\{P_kD\}$ as a function of the iteration for $t = 0.1$ and $\gamma = 0.9$.  As $k$ increases, $\mu_t$ converges to the value of $t$.}
+  \label{fig:mu_t}
+\end{figure}
+
+Constructing a smaller $150 \times 250$ redundant DCT dictionary with $p$ varying from $21$--$25$ we found that optimizing $P$ with $200$ iterations and $15$ averaged test signals $x_j$ did make a difference and improved the reconstruction compared to only random choices of $P$.  Figure \ref{fig:err} shows the CS errors as a function of $p$.  Although the difference between the error is small in our experiment, we observed that increasing the number of iterations, number of signal averages, and matrix dimensions, while computationally expensive especially using our numerical code, increases the error gap and provides more faithful reconstructions.
 
 \begin{figure}[]
   \centering
   \includegraphics[width=0.45\textwidth]{rel_errors.eps}
   \caption{CS errors as a function of the number of measurements $p$ with randomly generated $P$ and optimized projections $P_{opt}$.}
-  \label{fig:intuitive}
+  \label{fig:err}
 \end{figure}
+
+To visualize the change in the projection matrix $P$ after optimization, we recreated a histogram showing the absolute off-diagonal entries of the Gram matrix $G$ before and after the algorithm was run using 
 
 \begin{figure}[]
   \centering
-  \includegraphics[width=0.45\textwidth]{mu_t.eps}
-  \caption{Value of $\mu_t\{P_kD\}$ as a function of the iteration for $t = 0.1$ and $\gamma = 0.9$.}
-  \label{fig:intuitive}
+  \includegraphics[width=0.45\textwidth]{hist.eps}
+  \caption{CS errors as a function of the number of measurements $p$ with randomly generated $P$ and optimized projections $P_{opt}$.}
+  \label{fig:hist}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{CONCLUSION}
+\section{DISCUSSION}
 
-A conclusion
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

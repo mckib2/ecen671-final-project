@@ -4,9 +4,9 @@ close all;
 k = 200;
 n = 400;
 
-t = 0.1;
+t = 0.2;
 p = 30;
-gamma = 0.95;
+gamma = 0.4;
 iters = 50;
 
 %% test shrink
@@ -27,16 +27,21 @@ P = normc(gen_D(p,n));
 
 % Show original Projection Matrix
 figure(2);
+subplot(2,1,1);
 G = ((P*D)'*P*D);
 histogram(abs(offdiag(G)));
+xlim([0 1]);
+title('Original Projection Matrix');
 
 %% run
 [ P_opt, Pk ] = min_P(D,P,t,p,gamma,iters);
 
 %% show optimial Projection Matrix
-figure(3);
+subplot(2,1,2);
 G_opt = (P_opt*D)'*P_opt*D;
 histogram(abs(offdiag(G_opt)));
+xlim([0 1]);
+title('After 50 iterations');
 
 %% get mutual coherence values
 mu = zeros(length(Pk),1);
