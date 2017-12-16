@@ -29,9 +29,10 @@ P = normc(gen_D(p,n));
 figure(2);
 subplot(2,1,1);
 G = ((P*D)'*P*D);
-histogram(abs(offdiag(G)));
-xlim([0 1]);
+histogram(abs(offdiag(G)),'FaceColor','k');
+xlim([0 0.8]);
 title('Original Projection Matrix');
+ylim([0 2500]);
 
 %% run
 [ P_opt, Pk ] = min_P(D,P,t,p,gamma,iters);
@@ -39,8 +40,9 @@ title('Original Projection Matrix');
 %% show optimial Projection Matrix
 subplot(2,1,2);
 G_opt = (P_opt*D)'*P_opt*D;
-histogram(abs(offdiag(G_opt)));
-xlim([0 1]);
+histogram(abs(offdiag(G_opt)),'FaceColor','k');
+xlim([0 .8]);
+ylim([0 2500]);
 title('After 50 iterations');
 
 %% get mutual coherence values

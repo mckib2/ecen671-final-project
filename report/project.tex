@@ -34,7 +34,7 @@ Successful CS reconstruction is achieved if certain properties of the sampling o
 
 In 2007, Michael Elad demonstrated that minimizing the mutual coherence of a projection matrix $P$ (the sampling operator) improves CS reconstruction \cite{elad}.  In this paper we will present the main theory behind the optimization, the results of our implementation, and a discussion of the merits and pitfalls of Elad's algorithm.
 
-\section{MATH}
+\section{THEORY}
 
 Here we describe the math behind our CS implementation.  For a set of signals $\{x_j \in \mathbb{R}^n\}$ that we are interested in measuring, we assume that each $x_j$ has a sparse representation in some transform domain, such as the Discrete Cosine Transform (DCT).  If we have a dictionary of vectors $D \in \mathbb{R}^{n\times k}$ whose columns span the transform domain, then we represent $x_j$ as a linear combination: $x_j = D\alpha_j$, where $||\alpha_j||_0 \ll n$, with the $\ell_0$-norm describing $\alpha$ as a sparse vector.  If this is the case, then our signal $x_j$ can be accurately (or perfectly) represented in a much-lower dimensional vector space $\mathbb{R}^p$ as $$y_j = Px_j=PD\alpha_j$$ where $P \in \mathbb{R}^{p\times n}$ with $p \ll n$ is the projection matrix from $\mathbb{R}^n$ to the lower-dimensional space $\mathbb{R}^p$.  We can then recover each $x_j$ from $y_j$ by finding the sparsest $\alpha$ that satisfies $y_j = PD\alpha_j$.
 
@@ -68,13 +68,20 @@ Constructing a smaller $150 \times 250$ redundant DCT dictionary with $p$ varyin
   \label{fig:err}
 \end{figure}
 
-To visualize the change in the projection matrix $P$ after optimization, we recreated a histogram showing the absolute off-diagonal entries of the Gram matrix $G$ before and after the algorithm was run using 
+To visualize the change in the projection matrix $P$ after optimization, we recreated a histogram showing the absolute off-diagonal entries of the Gram matrix $G$ before and after the algorithm was run using a fixed $t$ value of $0.2$ and $\gamma$ of $0.4$.  Figure \ref{fig:hist} shows our results.  We note a marked shift towards the origin of the histogram after optimization with a shortening of the tail (representing the ``shrinking'' of higher values in the Gram matrix).  Figure \ref{fig:hist_from_paper} shows the same histogram as presented in the paper with the same features.
 
 \begin{figure}[]
   \centering
-  \includegraphics[width=0.45\textwidth]{hist.eps}
-  \caption{CS errors as a function of the number of measurements $p$ with randomly generated $P$ and optimized projections $P_{opt}$.}
+  \includegraphics[width=0.45\textwidth]{hist_bw.eps}
+  \caption{Histogram of the absolute off-diagonal entries of $G$ before the optimization and aftwerwards, using a fixed threshold $t = 0.2$.}
   \label{fig:hist}
+\end{figure}
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.45\textwidth]{hist_from_paper.eps}
+  \caption{Histogram of the absolute off-diagonal entries of $G$ before the optimization and aftwerwards, using a fixed threshold $t = 0.2$ as presented in the paper.}
+  \label{fig:hist_from_paper}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
