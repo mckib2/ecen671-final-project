@@ -27,10 +27,10 @@ figure(1);
 % h.MarkerSize = 2;
 % idx = 1:2:N;
 % h.MarkerIndices = idx;
-idx = 1:1:N;
+% idx = 1:2:N;
 samps = zeros(size(f));
 samps(idx) = f(idx);
-samps(samps == 0) = NaN;
+% samps(samps == 0) = NaN;
 plot(t,samps,'.');
 
 % plot(t,f(idx),'-');
@@ -39,7 +39,7 @@ zoom('xon'); zoom(13);
 %% IDCT of f
 % Plot the actual sparse coefficients
 figure(2);
-c = idct(f);
+c = idct(samps);
 plot(c);
 
 %% Construct A
